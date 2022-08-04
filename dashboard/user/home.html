@@ -1,0 +1,68 @@
+<br />
+<h4>Home Page</h4>
+<br />
+<div class="row" id="campaigns"></div>
+
+<script>
+  $(document).ready(function () {
+    getCampaigns();
+  });
+
+  function viewCampaign(id) {
+    $.ajax({
+      url: "./view-campaign.php",
+      type: "GET",
+      data: {
+        id: id,
+        user_id: sessionStorage.getItem('user_id'),
+      },
+      success: function (data) {
+        $("#main-section-holder").html(data);
+      },
+    });
+  }
+
+  function getCampaigns() {
+    $.ajax({
+      url: "./handler/get-all-campaigns.php",
+      type: "GET",
+      success: function (data) {
+        data = JSON.parse(data);
+        if (data.code === 200) {
+          var campaigns = data.campaigns;
+          var html = "";
+          for (var i = 0; i < campaigns.length; i++) {
+            html += '<div class="col-sm-12 col-md-6 my-3">';
+            html += '<div class="card bg-light">';
+            html += '<div class="card-body">';
+            html +=
+              '<h5 class="card-title">' + campaigns[i].campaign_name + "</h5>";
+            html += '<p class="card-text">' + campaigns[i].description + "</p>";
+            html += '<div class="progress">';
+            html +=
+              '<div class="progress-bar progress-bar-striped active bg-success" role="progressbar" aria-valuenow="' +
+              campaigns[i].received +
+              '" aria-valuemin="0" aria-valuemax="' +
+              campaigns[i].total +
+              '" style="width: ' +
+              (campaigns[i].received / campaigns[i].total) * 100 +
+              '%">';
+            html += (campaigns[i].received / campaigns[i].total) * 100 + "%";
+            html += "</div>";
+            html += "</div>";
+            html +=
+              '<button class="btn btn-outline-dark mt-3" onclick="viewCampaign(' +
+              campaigns[i].campaign_id +
+              ')" >View More</button>';
+            html += "</div>";
+            html += "</div>";
+            html += "</div>";
+          }
+          document.getElementById("campaigns").innerHTML = html;
+        } else {
+          alert("Something went wrong");
+        }
+      },
+    });
+  }
+</script>

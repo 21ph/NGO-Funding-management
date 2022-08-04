@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Dashboard</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="../../main.css" />
+  </head>
+  <body style="height: 100vh">
+    <header></header>
+    <main class="h-100">
+      <div class="container-fluid h-100">
+        <div class="row h-100">
+          <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+            <div class="sidebar-sticky h-100">
+              <ul class="nav flex-column justify-content-between h-100">
+                <div>
+                  <li class="nav-item p-4">
+                    <div
+                      data-navigator="index"
+                      class="nav-brand active text-dark"
+                    >
+                      <span data-feather="home"></span>
+                      <h4>MiniProj</h4>
+                    </div>
+                  </li>
+                  <li class="nav-item">
+                    <div
+                      data-identifier="navLink"
+                      data-navigator="home"
+                      class="nav-link active text-dark"
+                    >
+                      <span data-feather="home"></span>
+                      Home
+                    </div>
+                  </li>
+                  <li class="nav-item">
+                    <div
+                      data-identifier="navLink"
+                      data-navigator="my-donations"
+                      class="nav-link active text-dark"
+                    >
+                      <span data-feather="home"></span>
+                      My Donations
+                    </div>
+                  </li>
+                  <li class="nav-item">
+                    <div
+                      data-identifier="navLink"
+                      data-navigator="add-funds"
+                      class="nav-link text-dark"
+                    >
+                      <span data-feather="file"></span>
+                      Add Funds
+                    </div>
+                  </li>
+                 
+                </div>
+                <li class="nav-item" onclick="logout()">
+                  <div
+                    data-navigator="user-profile"
+                    class="nav-link text-dark"
+                  >
+                    <span data-feather="users"></span>
+                    Logout
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </nav>
+          <div role="main" class="col-md-7 ml-sm-auto px-4">
+            <section id="main-section-holder"></section>
+          </div>
+          <div class="col-md-3 ml-sm-auto px-4">
+            <div
+              class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
+            >
+              <h1 class="h2">Donations</h1>
+            </div>
+            <div class="row" id="recent-donations">
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <footer></footer>
+
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.js"
+      integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      
+      if(sessionStorage.getItem("user_id") == 0) {
+        window.location.href = "../../";
+      }
+
+
+      function logout() {
+        sessionStorage.setItem("user_id", 0);
+        sessionStorage.setItem("user_name", null);
+        window.location.href = "../../";
+      }
+
+
+      $(document).ready(function () {
+        let nav = "./dashboard/user/home.html";
+        getNavigationData(nav);
+        getDonations();
+        $('[data-identifier="navLink"]').click(function () {
+          let nav = "./dashboard/user/" + $(this).data("navigator") + ".html";
+          getNavigationData(nav);
+        });
+      });
+
+
+      function getNavigationData(nav) {
+        $.ajax({
+          url: "../../navigation.php",
+          type: "POST",
+          data: {
+            nav: nav,
+          },
+          success: function (data) {
+            $("#main-section-holder").html(data);
+          },
+        });
+      }
+
+      let donation_count = 0;
+
+      function getDonationsCount(){
+        let count = 0;
+        $.ajax({
+          url: "./handler/getDonationsCount.php",
+          type: "GET",
+          success: function (data) {
+            data = JSON.parse(data);
+            
+            if(parseInt(data.count) > donation_count){
+              donation_count = parseInt(data.count);;
+              console.log("updating count : " + donation_count);
+              getDonations();
+            }
+          },
+        });
+      }
+
+
+      function getDonations(){
+        $.ajax({
+          url: "./handler/getDonations.php",
+          type: "GET",
+          success: function (data) {
+            data = JSON.parse(data);
+            if(data.code === 200)
+              populateDonations(data.donations);
+            else{
+              alert("Something went wrong :(");
+              return 0;
+            }
+          },
+        });
+      }
+
+      function populateDonations(data){
+        console.log(data);
+        let html = "";
+        for(let i = 0; i < data.length; i++){
+          html += `
+          <div class="col-md-12 my-1">
+            <div class="bg-dark text-white p-4" style="border-radius: 5px;">
+              <b>${data[i].full_name}</b> donated <b>₹${data[i].amount}</b> to <b>${data[i].campaign_name}</b>
+            </div>
+          </div>
+          `;
+        }
+        $('#recent-donations').html(html);
+      }
+
+      setInterval(function(){
+        let count = getDonationsCount();
+      }, 1000);
+
+
+    </script>
+  </body>
+</html>

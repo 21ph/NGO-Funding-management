@@ -1,0 +1,50 @@
+<br>
+<h4>Add Funds</h4>
+<br>
+<div class="jumbotron jumbotron-fluid" style="border-radius: 10px; max-width: 500px;">
+    <div class="container">
+        <p class="lead">
+            <form onsubmit="(e) => e.preventDefault()">
+                <div class="form-group d-flex flex-column">
+                    <h5>Enter Amount:</h5>
+                    <input type="number" class="form-control w-100" name="amount" id="amount" placeholder="">
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <button type="button" onclick="addFunds()" class="btn btn-success w-100">Add</button>
+                    </div>
+                    <div class="col-md-6">
+                        <button type="reset" class="btn btn-danger w-100">Clear</button>
+                    </div>
+                </div>
+            </form>
+        </p>
+    </div>
+</div>
+
+<script>
+    function addFunds(){
+        var amount = document.getElementById("amount").value;
+        if(amount == ""){
+            alert("Please enter amount");
+            return;
+        }
+        $.ajax({
+            url: "./handler/add-funds.php",
+            type: "POST",
+            data: {
+                amount: amount,
+                user_id: parseInt(sessionStorage.getItem('user_id'))
+            },
+            success: function(data){
+                data = JSON.parse(data);
+                if(data.code === 200){
+                    alert("Funds added successfully");
+                }
+                else{
+                    alert("Something went wrong");
+                }
+            }
+        });
+    }
+</script>

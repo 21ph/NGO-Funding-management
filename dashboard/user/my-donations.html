@@ -1,0 +1,62 @@
+<br />
+<h4>My Donations</h4>
+<br />
+
+<table class="table table-inverse w-100">
+  <thead class="thead-light">
+    <tr>
+      <th></th>
+      <th>To</th>
+      <th>Amount</th>
+      <th>Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td scope="row"></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+<script>
+  $(document).ready(function () {
+    populateDonations();
+  });
+
+  function populateDonations() {
+    $.ajax({
+      type: "POST",
+      url: "./handler/getDonationsById.php",
+      data: {
+        user_id: sessionStorage.getItem("user_id"),
+      },
+      success: function (data) {
+          console.log(data);
+        data = JSON.parse(data);
+        if (data.code === 200) {
+          renderComponentData(data.donations);
+        }
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.log(errorThrown);
+      },
+    });
+  }
+
+    function renderComponentData(data) {
+        let table = $("table tbody");
+        table.html("");
+        for (let i = 0; i < data.length; i++) {
+            let row = $("<tr>");
+            row.append($("<td>").html(i + 1));
+            row.append($("<td>").html(data[i].campaign_name));
+            row.append($("<td>").html('₹ '+data[i].amount));
+            row.append($("<td>").html(data[i].timestamp));
+            table.append(row);
+        }
+    }
+    
+</script>

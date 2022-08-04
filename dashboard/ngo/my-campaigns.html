@@ -1,0 +1,100 @@
+<br />
+<h4>My Campaigns</h4>
+<br />
+<div class="row" id="banner"></div>
+<div class="row" id="campaigns"></div>
+
+<script>
+  let campaign = [];
+  $(document).ready(function () {
+    populateCampaigns();
+    if (campaign.length === 0) {
+      $("#banner").html("<h4>You have no campaigns!</h4>");
+    }
+    let idx = 0;
+    setInterval(() => {
+      idx = (idx + 1) % campaign.length;
+      renderBigComponent(idx);
+    }, 5000);
+  });
+  const populateCampaigns = () => {
+    $.ajax({
+      type: "GET",
+      url:
+        "handler/my-campaigns.php?ngo_id=" + sessionStorage.getItem("ngo_id"),
+      success: function (data) {
+        data = JSON.parse(data);
+        if (data.code === 200) {
+          campaign = data.campaigns;
+          renderComponentData(campaign);
+          renderBigComponent(0);
+        }
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.log(errorThrown);
+      },
+    });
+  };
+
+  function renderBigComponent(idx) {
+    if (campaign[idx] === undefined) {
+      return;
+    }
+    var html = "";
+    html += '<div class="col-md-12 mx-0 p-1">';
+    html += `<div class="jumbotron">
+    <h1 class="display-3">${campaign[idx].campaign_name}</h1>
+    <p class="lead">${campaign[idx].description}</p>
+    <hr class="my-3">
+    <p class="lead">₹${campaign[idx].received} / ₹${campaign[idx].total}</p>
+    <div class="progress mb-4 bg-dark">
+    <div class="progress-bar progress-bar-striped active bg-success" role="progressbar"
+    aria-valuenow="${campaign[idx].received}" aria-valuemin="0" aria-valuemax="${campaign[idx].total}" style="width:${(campaign[idx].received/campaign[idx].total)*100}%">
+    ${(campaign[idx].received/campaign[idx].total)*100}%
+    </div>
+    </div>
+    <p class="lead">
+    </p>
+    </div>`
+    // html += '<div class="jumbotron bg-light">';
+    // html += '<div class="card-body">';
+    // html += '<h5 class="card-title">' + campaign[idx]?.campaign_name + "</h5>";
+    // html += '<p class="card-text">' + campaign[idx]?.description + "</p>";
+    // html += "</div>";
+    // html += "</div>";
+    html += "</div>";
+    $("#banner").html(html);
+  }
+
+  function renderComponentData(campaigns) {
+    var html = "";
+    for (var i = 0; i < campaigns.length; i++) {
+      html += '<div class="col-sm-12 col-md-4 my-3">';
+      html += '<div class="card bg-light h-100">';
+      html +=
+        '<div class="card-body d-flex flex-column justify-content-between">';
+      html += "<div>";
+      html += '<h5 class="card-title">' + campaigns[i].campaign_name + "</h5>";
+      html += '<p class="card-text">' + campaigns[i].description + "</p>";
+      html += "</div>";
+      html += "<div>";
+      html += '<div class="progress">';
+      html +=
+        '<div class="progress-bar progress-bar-striped active bg-success" role="progressbar" aria-valuenow="' +
+        campaigns[i].received +
+        '" aria-valuemin="0" aria-valuemax="' +
+        campaigns[i].total +
+        '" style="width: ' +
+        (campaigns[i].received / campaigns[i].total) * 100 +
+        '%">';
+      html += (campaigns[i].received / campaigns[i].total) * 100 + "%";
+      html += "</div>";
+      html += "</div>";
+      html += "</div>";
+      html += "</div>";
+      html += "</div>";
+      html += "</div>";
+    }
+    $("#campaigns").append(html);
+  }
+</script>
